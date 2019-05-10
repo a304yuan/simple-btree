@@ -36,8 +36,8 @@ static inline size_t btree_nodes(const btree * tree) {
 static inline size_t btree_keys(const btree * tree) {
     return tree->keys;
 }
-extern bool btree_exist(btree * tree, any key);
-extern any btree_get(btree * tree, any key);
+extern bool btree_exist(const btree * tree, any key);
+extern any btree_get(const btree * tree, any key);
 extern void btree_insert(btree * tree, any key, any value);
 extern void btree_delete(btree * tree, any key);
 

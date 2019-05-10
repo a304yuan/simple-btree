@@ -123,7 +123,7 @@ static btree_node * btree_min_node(btree_node * root) {
 	return root;
 }
 
-static btree_node * btree_find(btree * tree, any * key, int * idx) {
+static btree_node * btree_find(const btree * tree, any * key, int * idx) {
 	btree_node * cur_node = tree->root;
 	int i;
 	while (true) {
@@ -145,9 +145,20 @@ static btree_node * btree_find(btree * tree, any * key, int * idx) {
 	}
 }
 
-bool btree_exist(btree * tree, any key) {
+bool btree_exist(const btree * tree, any key) {
     int idx;
     return btree_find(tree, &key, &idx) ? true : false;
+}
+
+any btree_get(const btree * tree, any key) {
+    int idx;
+    btree_node * node = btree_find(tree, &key, &idx);
+    if (node) {
+        return node->key[idx];
+    }
+    else {
+        return ANY_NONE;
+    }
 }
 
 static void btree_node_delete_key(btree_node * x, int idx) {
