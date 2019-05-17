@@ -83,6 +83,25 @@ static inline bool btree_node_full(const btree_node * x) {
 	return x->keys == BTREE_T * 2 - 1;
 }
 
+static int btree_node_find_pos(const btree * tree, const btree_node * node, const any * key) {
+    int left = 0, right = node->keys - 1;
+    int mid = 0, cmp = 0;
+    while (left <= right) {
+        mid = (left + right) / 2;
+        cmp = tree->compare(key, &node->key[mid]);
+        if (cmp == 0) {
+            return mid;
+        }
+        else if (cmp < 0) {
+            right = mid - 1;
+        }
+        else {
+            left = mid + 1;
+        }
+    }
+    return cmp <= 0 ? mid : mid + 1;
+}
+
 void btree_insert(btree * tree, any key, any value) {
 	btree_node * cur_node = tree->root;
 	int idx;
@@ -93,10 +112,11 @@ void btree_insert(btree * tree, any key, any value) {
 			cur_node = cur_node->parent;
 		}
         // find the position to insert key
-		for (idx = 0; idx < cur_node->keys; idx++) {
-			if (tree->compare(&key, &cur_node->key[idx]) < 0)
-                break;
-        }
+		//for (idx = 0; idx < cur_node->keys; idx++) {
+		//	if (tree->compare(&key, &cur_node->key[idx]) < 0)
+        //        break;
+        //}
+        idx = btree_node_find_pos(tree, cur_node, &key);
         // insert if it is leaf node
 		if (cur_node->childs == 0) {
 			btree_node_insert_key(cur_node, idx, &key);
@@ -127,6 +147,7 @@ static btree_node * btree_find(const btree * tree, any * key, int * idx) {
 	btree_node * cur_node = tree->root;
 	int i;
 	while (true) {
+        /*
 		for (i = 0; i < cur_node->keys; i++) {
             int cmp = tree->compare(key, &cur_node->key[i]);
 			if (cmp == 0) {
@@ -135,8 +156,13 @@ static btree_node * btree_find(const btree * tree, any * key, int * idx) {
 			}
 			else if (cmp < 0) break;
 		}
-
-		if (cur_node->childs > 0) {
+        */
+        i = btree_node_find_pos(tree, cur_node, key);
+        if (tree->compare(key, &cur_node->key[i]) == 0) {
+            *idx = i;
+            return cur_node;
+        }
+        else if (cur_node->childs > 0) {
             cur_node = cur_node->child[i];
         }
 		else {
